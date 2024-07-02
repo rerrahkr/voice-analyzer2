@@ -1,0 +1,38 @@
+{
+  "name": "voice-analyzer",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "biome list --apply ./src",
+    "format": "biome format ./src --write",
+    "check": "biome check --apply ./src",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@emotion/react": "11.11.4",
+    "@emotion/styled": "11.11.5",
+    "@fontsource/roboto": "5.0.13",
+    "@mui/icons-material": "5.15.20",
+    "@mui/material": "5.15.20",
+    "immer": "10.1.1",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "zustand": "4.5.2"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.8.2",
+    "@types/node": "20.14.8",
+    "@types/react": "18.3.3",
+    "@types/react-dom": "18.3.0",
+    "@vitejs/plugin-react-swc": "3.7.0",
+    "typescript": "5.5.2",
+    "vite": "5.3.1"
+  },
+  "volta": {
+    "node": "20.15.0",
+    "yarn": "4.3.1"
+  }
+}
