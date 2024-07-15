@@ -1,4 +1,6 @@
-import { Button, type ButtonProps } from "@mui/material";
+import FileOpenOutlinedIcon from "@mui/icons-material/FileOpenOutlined";
+import type { ButtonProps } from "@mui/material/Button";
+import IconButton from "@mui/material/IconButton";
 import type React from "react";
 import { useEffect, useRef } from "react";
 
@@ -65,7 +67,9 @@ export function FileInputButton({
         multiple={multiple}
         onChange={onChange}
       />
-      <Button onClick={handleButtonClick} {...buttonProps} />
+      <IconButton onClick={handleButtonClick} {...buttonProps}>
+        <FileOpenOutlinedIcon />
+      </IconButton>
     </>
   );
 }

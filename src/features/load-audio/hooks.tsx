@@ -1,13 +1,17 @@
+import { useSetAudio, useStopAudio } from "@/hooks";
 import type React from "react";
 import { useCallback, useState } from "react";
 import { readFileAsArray } from "./utils/file-read";
-import { decodeWav } from "./utils/wav";
 
 export function useLoadAudio() {
   const [fileName, setFileName] = useState<string>("");
+  const setAudio = useSetAudio();
+  const stopAudio = useStopAudio();
 
   const handleFileChange = useCallback(
     async (ev: React.ChangeEvent<HTMLInputElement>) => {
+      stopAudio();
+
       const file = ev.target?.files?.item(0);
       if (!file) {
         return;
@@ -17,8 +21,11 @@ export function useLoadAudio() {
         const buffer = await readFileAsArray(file);
         console.log(buffer);
 
-        const audioData = await decodeWav(buffer);
-        console.log(audioData);
+        const audioContext = new AudioContext();
+        const audioBuffer = await audioContext.decodeAudioData(buffer);
+
+        setAudio(audioBuffer);
+        console.log(audioBuffer);
 
         setFileName(file.name);
       } catch (e) {
@@ -32,7 +39,7 @@ export function useLoadAudio() {
         setFileName("");
       }
     },
-    []
+    [stopAudio, setAudio]
   );
 
   return {

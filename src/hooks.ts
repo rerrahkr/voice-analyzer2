@@ -1,11 +1,30 @@
-import { type FileState, useFileStore } from "./store";
+import {
+  type AudioState,
+  type TransportState,
+  useAudioStore,
+  useTransportState,
+} from "./store";
 
-function useFile(): FileState["file"] {
-  return useFileStore((state) => state.file);
+export function useAudio(): AudioState["audio"] {
+  return useAudioStore((state) => state.audio);
 }
 
-function useSetFile(): FileState["setFile"] {
-  return useFileStore((state) => state.setFile);
+export function useSetAudio(): AudioState["setAudio"] {
+  return useAudioStore((state) => state.setAudio);
 }
 
-export { useFile, useSetFile };
+export function useTransportStateState(): TransportState["state"] {
+  return useTransportState((state) => state.state);
+}
+
+export function usePlayAudio(): TransportState["play"] {
+  return useTransportState((state) => state.play);
+}
+
+export function usePauseAudio(): TransportState["pause"] {
+  return useTransportState((state) => state.pause);
+}
+
+export function useStopAudio(): TransportState["stop"] {
+  return useTransportState((state) => state.stop);
+}

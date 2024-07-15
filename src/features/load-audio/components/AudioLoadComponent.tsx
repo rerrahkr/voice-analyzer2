@@ -21,10 +21,14 @@ export function AudioLoadComponent(): React.JSX.Element {
       <Typography
         component="label"
         htmlFor="fileInput"
-        noWrap
-        sx={{ marginLeft: 1 }}
+        overflow="hidden"
+        whiteSpace="nowrap"
+        textOverflow="ellipsis"
+        sx={{
+          width: 100,
+        }}
       >
-        {fileName}
+        {fileName || "---"}
       </Typography>
     </Stack>
   );
