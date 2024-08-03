@@ -1,6 +1,7 @@
 import { useSetAudio, useStopAudio } from "@/hooks";
 import type React from "react";
 import { useCallback, useState } from "react";
+import { makeAudioBufferMono } from "./utils/dsp";
 import { readFileAsArray } from "./utils/file-read";
 
 export function useLoadAudio() {
@@ -22,7 +23,8 @@ export function useLoadAudio() {
         console.log(buffer);
 
         const audioContext = new AudioContext();
-        const audioBuffer = await audioContext.decodeAudioData(buffer);
+        const originalAudioBuffer = await audioContext.decodeAudioData(buffer);
+        const audioBuffer = await makeAudioBufferMono(originalAudioBuffer);
 
         setAudio(audioBuffer);
         console.log(audioBuffer);
