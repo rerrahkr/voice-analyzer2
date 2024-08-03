@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 export function useTransportAudio() {
   const audio = useAudio();
 
-  const audioContextRef = useRef<AudioContext | null>(null);
+  const audioContextRef = useRef<AudioContext>();
   const transportState = useTransportStateState();
   const stopAudio = useStopAudio();
 
@@ -35,7 +35,7 @@ export function useTransportAudio() {
 
         case "stopping":
           await audioContextRef.current?.close();
-          audioContextRef.current = null;
+          audioContextRef.current = undefined;
           break;
       }
     }
