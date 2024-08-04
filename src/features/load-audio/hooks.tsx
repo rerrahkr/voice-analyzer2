@@ -20,22 +20,16 @@ export function useLoadAudio() {
 
       try {
         const buffer = await readFileAsArray(file);
-        console.log(buffer);
 
         const audioContext = new AudioContext();
         const originalAudioBuffer = await audioContext.decodeAudioData(buffer);
         const audioBuffer = await makeAudioBufferMono(originalAudioBuffer);
 
         setAudio(audioBuffer);
-        console.log(audioBuffer);
-
         setFileName(file.name);
       } catch (e) {
-        console.log("[Error] Could not load file!");
-
-        if (e instanceof Error) {
-          console.log(`${e.name}\n${e.message}`);
-        }
+        window.alert("Failed to load file...");
+        console.error("[Error in Loading Audio]", e);
 
         ev.target.value = "";
         setFileName("");

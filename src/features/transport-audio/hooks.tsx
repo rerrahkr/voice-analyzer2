@@ -41,7 +41,7 @@ export function useTransportAudio() {
     }
 
     controlTransport().catch((err) => {
-      console.log(err);
+      console.error("[Error in Audio Transport]", err);
     });
   }, [transportState, audio, stopAudio]);
 }
