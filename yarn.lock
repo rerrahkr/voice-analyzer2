@@ -824,6 +824,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@p5-wrapper/react@npm:4.4.2":
+  version: 4.4.2
+  resolution: "@p5-wrapper/react@npm:4.4.2"
+  dependencies:
+    microdiff: "npm:^1.4.0"
+    p5: "npm:^1.9.4"
+  peerDependencies:
+    react: ">= 18.2.0"
+    react-dom: ">= 18.2.0"
+  checksum: 10c0/8965407525f6c148afb0b05085341cad25004dc0f074c1521218bd40975e4acf2de8b36f3513079d8999d7aa5069b0c0dfbddc03b6d3db6d0b77cd290768c5d3
+  languageName: node
+  linkType: hard
+
 "@pkgjs/parseargs@npm:^0.11.0":
   version: 0.11.0
   resolution: "@pkgjs/parseargs@npm:0.11.0"
@@ -1095,6 +1108,13 @@ __metadata:
   dependencies:
     undici-types: "npm:~5.26.4"
   checksum: 10c0/06d4643fa3b179b41fe19f9c75c240278ca1f7a313b3b837bc36ea119499c7ad77f06bbe72694ac04aa91ec77fe747baa09b889f4c435450c1724a26bd55f160
+  languageName: node
+  linkType: hard
+
+"@types/p5@npm:1.7.6":
+  version: 1.7.6
+  resolution: "@types/p5@npm:1.7.6"
+  checksum: 10c0/92f53b7666a346a70c144fd72e09d06b9ef54a099098629717d0a70043d2ce96f1e3f49e6d36c7afa7f27ceaa4b833cca50d9d33878d201fce7105658ace0a6e
   languageName: node
   linkType: hard
 
@@ -1873,6 +1893,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"microdiff@npm:^1.4.0":
+  version: 1.4.0
+  resolution: "microdiff@npm:1.4.0"
+  checksum: 10c0/25c3bdb62a2c4f7a881570c8f923adfe63185a4b8b690a285c213af99ebdb3e6481fa04f05422044230f40c9109513c511e5d29dbd1071891b8031eef779eb2c
+  languageName: node
+  linkType: hard
+
 "minimatch@npm:^9.0.4":
   version: 9.0.5
   resolution: "minimatch@npm:9.0.5"
@@ -2042,6 +2069,13 @@ __metadata:
   dependencies:
     aggregate-error: "npm:^3.0.0"
   checksum: 10c0/592c05bd6262c466ce269ff172bb8de7c6975afca9b50c975135b974e9bdaafbfe80e61aaaf5be6d1200ba08b30ead04b88cfa7e25ff1e3b93ab28c9f62a2c75
+  languageName: node
+  linkType: hard
+
+"p5@npm:^1.9.4":
+  version: 1.10.0
+  resolution: "p5@npm:1.10.0"
+  checksum: 10c0/18de903cabb12b85f49608c03c59f89f0c8f1d15cd9b4b0e58f79678b29dc53a5a8b35cfbe9c8f7f6d361b2c1386b9fa57ef30ae7bcbd5a4f877d246c2e90041
   languageName: node
   linkType: hard
 
@@ -2604,7 +2638,9 @@ __metadata:
     "@fontsource/roboto": "npm:5.0.13"
     "@mui/icons-material": "npm:5.15.20"
     "@mui/material": "npm:5.15.20"
+    "@p5-wrapper/react": "npm:4.4.2"
     "@types/node": "npm:20.14.8"
+    "@types/p5": "npm:1.7.6"
     "@types/react": "npm:18.3.3"
     "@types/react-dom": "npm:18.3.0"
     "@vitejs/plugin-react-swc": "npm:3.7.0"
