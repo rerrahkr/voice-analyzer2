@@ -2,10 +2,15 @@ import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
 
 type AutoResizedCanvasProps = {
   /**
+   * CSS style for container element.
+   */
+  style?: React.CSSProperties | undefined;
+
+  /**
    * Event handler called when the canvas is resized.
    * @param canvas Canvas element.
    */
-  onResize?: (canvas: HTMLCanvasElement) => void;
+  onResize?: ((canvas: HTMLCanvasElement) => void) | undefined;
 };
 
 /**
@@ -15,6 +20,8 @@ export const AutoResizedCanvas = forwardRef<
   HTMLCanvasElement,
   AutoResizedCanvasProps
 >((props, ref) => {
+  const { onResize, style: containerStyle } = props;
+
   const canvasRef = useRef<HTMLCanvasElement>(null);
   useImperativeHandle<HTMLCanvasElement | null, HTMLCanvasElement | null>(
     ref,
@@ -54,8 +61,8 @@ export const AutoResizedCanvas = forwardRef<
         canvas.style.width = `${directionIsHorizontal ? size.inlineSize : size.blockSize}px`;
       }
 
-      if (props.onResize) {
-        props.onResize(canvas);
+      if (onResize) {
+        onResize(canvas);
       }
     });
     observer.observe(container, { box: "device-pixel-content-box" });
@@ -63,22 +70,18 @@ export const AutoResizedCanvas = forwardRef<
     return () => {
       return observer.disconnect();
     };
-  }, [props.onResize]);
+  }, [onResize]);
 
   return (
-    <div
-      ref={containerRef}
-      style={{
-        width: "100%",
-        height: "100%",
-      }}
-    >
+    <div ref={containerRef} style={containerStyle}>
       <canvas
         ref={canvasRef}
         style={{
           display: "block",
         }}
-      />
+      >
+        Canvas is not supported in this browser.
+      </canvas>
     </div>
   );
 });
