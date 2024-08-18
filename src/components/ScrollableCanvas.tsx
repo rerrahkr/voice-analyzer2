@@ -1,11 +1,13 @@
+import { type SerializedStyles, css } from "@emotion/react";
 import type React from "react";
 import { forwardRef, useImperativeHandle, useRef } from "react";
 import { AutoResizedCanvas } from "./AutoResizedCanvas";
 
+//----- Types.
 type ScrollableCanvasProps = Partial<{
+  staticCss: SerializedStyles | undefined;
   style: React.CSSProperties | undefined;
-  displayVericalBar: boolean | undefined;
-  displayHorizontalBar: boolean | undefined;
+  displayScrollbar: boolean | undefined;
   scrollableCanvasStyleWidth: React.CSSProperties["width"] | undefined;
   scrollableCanvasStyleHeight: React.CSSProperties["height"] | undefined;
   onScroll: React.UIEventHandler<HTMLDivElement> | undefined;
@@ -18,18 +20,70 @@ export type ScrollableCanvasElement = {
   readonly scroller: HTMLDivElement | null;
 };
 
+//----- Styles.
+const expandedSizeCss = css`
+  width: 100%;
+  height: 100%;
+`;
+
+const zeroPositionCss = css`
+  position: absolute;
+  top: 0;
+  left: 0;
+`;
+
+function scrollbarCss(shouldDisplay: boolean | undefined): SerializedStyles {
+  return css`
+    overflow: scroll;
+
+    @supports not selector(::-webkit-scrollbar) {
+      scrollbarWidth: ${shouldDisplay ? "auto" : "none"};
+    }
+
+    @supports selector(::-webkit-scrollbar) {
+      ::-webkit-scrollbar {
+        display: ${shouldDisplay ? undefined : "none"};
+      }
+    }
+  `;
+}
+
+const componentCss = {
+  container: css`
+    position: relative;
+  `,
+
+  canvasWrapper: css`
+    ${expandedSizeCss}
+  `, // Also uses overflow css
+
+  canvas: css`
+    ${expandedSizeCss}
+  `,
+
+  scroller: css`
+    ${zeroPositionCss}
+    ${expandedSizeCss}
+  `, // Also uses overflow css.
+
+  scrollerContent: `
+    ${zeroPositionCss}
+  `,
+};
+
+//----- Component.
 export const ScrollableCanvas = forwardRef<
   ScrollableCanvasElement,
   ScrollableCanvasProps
 >((props, ref) => {
   const {
-    displayVericalBar,
-    displayHorizontalBar,
+    displayScrollbar,
     scrollableCanvasStyleWidth,
     scrollableCanvasStyleHeight,
     onScroll,
     onResize,
-    style,
+    staticCss: containerCustomCss,
+    style: containerCustomStyle,
   } = props;
 
   // Modify external refs.
@@ -49,51 +103,26 @@ export const ScrollableCanvas = forwardRef<
       }) satisfies ScrollableCanvasElement
   );
 
-  const overflowStyle = {
-    overflowX: displayHorizontalBar ? "scroll" : "hidden",
-    overflowY: displayVericalBar ? "scroll" : "hidden",
-  } satisfies React.CSSProperties;
-
   return (
     <div
-      style={{
-        ...style,
-        position: "relative",
-      }}
+      css={[containerCustomCss, componentCss.container]}
+      style={containerCustomStyle}
     >
-      <div
-        style={{
-          width: "100%",
-          height: "100%",
-          ...overflowStyle,
-        }}
-      >
+      <div css={[componentCss.canvasWrapper, scrollbarCss(displayScrollbar)]}>
         <AutoResizedCanvas
           ref={canvasRef}
           onResize={onResize}
-          style={{
-            width: "100%",
-            height: "100%",
-          }}
+          staticCss={componentCss.canvas}
         />
       </div>
       <div
         onScroll={onScroll}
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          ...overflowStyle,
-        }}
+        css={[componentCss.scroller, scrollbarCss(displayScrollbar)]}
         ref={scrollerRef}
       >
         <div
+          css={componentCss.scrollerContent}
           style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
             width: scrollableCanvasStyleWidth,
             height: scrollableCanvasStyleHeight,
           }}

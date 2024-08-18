@@ -1,8 +1,14 @@
+import { type SerializedStyles, css } from "@emotion/react";
 import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
 
 type AutoResizedCanvasProps = {
   /**
-   * CSS style for container element.
+   * Static style for container element.
+   */
+  staticCss?: SerializedStyles | undefined;
+
+  /**
+   * Dynamic style for container element.
    */
   style?: React.CSSProperties | undefined;
 
@@ -13,6 +19,12 @@ type AutoResizedCanvasProps = {
   onResize?: ((canvas: HTMLCanvasElement) => void) | undefined;
 };
 
+const componentCss = {
+  canvas: css`
+    display: block;
+  `,
+};
+
 /**
  * Canvas component whose size is streched to its parent rectangle.
  */
@@ -20,7 +32,11 @@ export const AutoResizedCanvas = forwardRef<
   HTMLCanvasElement,
   AutoResizedCanvasProps
 >((props, ref) => {
-  const { onResize, style: containerStyle } = props;
+  const {
+    onResize,
+    staticCss: containerCustomCss,
+    style: containerCustomStyle,
+  } = props;
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   useImperativeHandle<HTMLCanvasElement | null, HTMLCanvasElement | null>(
@@ -73,13 +89,12 @@ export const AutoResizedCanvas = forwardRef<
   }, [onResize]);
 
   return (
-    <div ref={containerRef} style={containerStyle}>
-      <canvas
-        ref={canvasRef}
-        style={{
-          display: "block",
-        }}
-      >
+    <div
+      ref={containerRef}
+      css={containerCustomCss}
+      style={containerCustomStyle}
+    >
+      <canvas ref={canvasRef} css={componentCss.canvas}>
         Canvas is not supported in this browser.
       </canvas>
     </div>

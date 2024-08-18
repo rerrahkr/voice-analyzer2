@@ -4,7 +4,7 @@ import { defineConfig } from "vite";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react({ jsxImportSource: "@emotion/react" })],
   base: "/voice-analyzer2/",
   resolve: {
     alias: {

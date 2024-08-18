@@ -167,7 +167,7 @@ export function WaveView(): React.JSX.Element {
         height: "100%",
       }}
       ref={canvasRef}
-      displayHorizontalBar
+      displayScrollbar
       scrollableCanvasStyleWidth={scrollableCanvasStyleWidth}
       scrollableCanvasStyleHeight="100%"
       onResize={handleCanvasResize}
