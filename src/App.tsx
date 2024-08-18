@@ -24,7 +24,7 @@ function App(): React.JSX.Element {
         <AudioLoadComponent />
         <TransportController audioContextRef={audioContextRef} />
       </Stack>
-      <WaveView />
+      <WaveView audioContextRef={audioContextRef} />
     </Stack>
   );
 }

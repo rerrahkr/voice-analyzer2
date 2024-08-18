@@ -2,7 +2,7 @@ import {
   ScrollableCanvas,
   type ScrollableCanvasElement,
 } from "@/components/ScrollableCanvas";
-import { useAudio } from "@/hooks";
+import { useAudio, useElapsedTime, useTransportStateState } from "@/hooks";
 import type React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -12,7 +12,8 @@ const MAX_HEIGHT_PIXEL = 400;
 function draw(
   canvas: HTMLCanvasElement,
   audio: AudioBuffer | undefined,
-  scrollOffset: number
+  scrollOffset: number,
+  transportTime: number
 ) {
   const context = canvas.getContext("2d");
   if (!context) {
@@ -31,6 +32,26 @@ function draw(
   context.moveTo(0, centerY);
   context.lineTo(canvas.width, centerY);
   context.stroke();
+
+  // Draw transport line.
+  // TODO: Move this to another canvas.
+  {
+    const resolustionStyleRate =
+      canvas.width / canvas.getBoundingClientRect().width;
+    const multiplier = resolustionStyleRate / WIDTH_PIXEL_RATE;
+    const timeLeft = scrollOffset * multiplier;
+    const timeRight = (scrollOffset + canvas.width) * multiplier;
+
+    if (timeLeft <= transportTime && transportTime <= timeRight) {
+      context.strokeStyle = "black";
+
+      context.beginPath();
+      const x = (transportTime - timeLeft) * WIDTH_PIXEL_RATE;
+      context.moveTo(x, 0);
+      context.lineTo(x, canvas.height);
+      context.stroke();
+    }
+  }
 
   // Draw samples.
   if (!audio) {
@@ -102,7 +123,13 @@ function draw(
   context.stroke();
 }
 
-export function WaveView(): React.JSX.Element {
+type WaveViewProps = {
+  audioContextRef: React.MutableRefObject<AudioContext | undefined>;
+};
+
+export function WaveView({
+  audioContextRef,
+}: WaveViewProps): React.JSX.Element {
   const canvasRef = useRef<ScrollableCanvasElement>(null);
 
   const audio = useAudio();
@@ -110,23 +137,57 @@ export function WaveView(): React.JSX.Element {
   const [scrollableCanvasStyleWidth, setScrillableCanvasStyleWidth] =
     useState<string>("100%");
 
-  const handleCanvasResize = useCallback(
-    (canvas: HTMLCanvasElement) => {
-      if (canvasRef.current?.scroller) {
-        draw(canvas, audio, canvasRef.current.scroller.scrollLeft);
-      }
-    },
-    [audio]
-  );
+  const elapsed = useElapsedTime();
 
-  const handleScroll = useCallback(
-    (ev: React.UIEvent<HTMLDivElement>) => {
-      if (canvasRef.current?.canvas) {
-        draw(canvasRef.current.canvas, audio, ev.currentTarget.scrollLeft);
+  const getTransportTime = useCallback(() => {
+    const timeDiff = audioContextRef.current
+      ? audioContextRef.current.currentTime - elapsed.lastStamp
+      : 0;
+    return elapsed.time + timeDiff;
+  }, [audioContextRef.current, elapsed]);
+
+  const drawCallback = useCallback(() => {
+    const canvas = canvasRef.current?.canvas;
+    const scroller = canvasRef.current?.scroller;
+    if (canvas && scroller) {
+      draw(canvas, audio, scroller.scrollLeft, getTransportTime());
+    }
+  }, [audio, getTransportTime]);
+
+  useEffect(() => {
+    drawCallback();
+  }, [drawCallback]);
+
+  const requestIdRef = useRef<number>();
+
+  const { current: transportState } = useTransportStateState();
+
+  const animate = useCallback(() => {
+    requestIdRef.current = requestAnimationFrame(animate);
+    drawCallback();
+  }, [drawCallback]);
+
+  useEffect(() => {
+    if (transportState === "playing") {
+      // Start animation.
+      animate();
+    } else {
+      if (requestIdRef.current) {
+        // Stop animation.
+        cancelAnimationFrame(requestIdRef.current);
+        requestIdRef.current = undefined;
+      } else {
+        drawCallback();
       }
-    },
-    [audio]
-  );
+    }
+
+    return () => {
+      if (requestIdRef.current) {
+        cancelAnimationFrame(requestIdRef.current);
+        requestIdRef.current = undefined;
+      }
+    };
+  }, [transportState, animate, drawCallback]);
 
   useEffect(() => {
     // Resize view width.
@@ -151,15 +212,6 @@ export function WaveView(): React.JSX.Element {
     scroller.scrollLeft = 0;
   }, [audio]);
 
-  useEffect(() => {
-    // Draw canvas when audio is loaded.
-    const canvas = canvasRef.current?.canvas;
-    const scroller = canvasRef.current?.scroller;
-    if (canvas && scroller) {
-      draw(canvas, audio, scroller.scrollLeft);
-    }
-  }, [audio]);
-
   return (
     <ScrollableCanvas
       style={{
@@ -170,8 +222,8 @@ export function WaveView(): React.JSX.Element {
       displayScrollbar
       scrollableCanvasStyleWidth={scrollableCanvasStyleWidth}
       scrollableCanvasStyleHeight="100%"
-      onResize={handleCanvasResize}
-      onScroll={handleScroll}
+      onResize={drawCallback}
+      onScroll={drawCallback}
     />
   );
 }
