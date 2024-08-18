@@ -44,4 +44,6 @@ export function useTransportAudio() {
       console.error("[Error in Audio Transport]", err);
     });
   }, [transportState, audio, stopAudio]);
+
+  return { audioContextRef };
 }

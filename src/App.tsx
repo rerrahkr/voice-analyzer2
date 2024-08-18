@@ -2,10 +2,14 @@ import Stack from "@mui/material/Stack";
 import type React from "react";
 import { useAnalyzeAudio } from "./features/analyze-audio";
 import { AudioLoadComponent } from "./features/load-audio";
-import { TransportController } from "./features/transport-audio";
+import {
+  TransportController,
+  useTransportAudio,
+} from "./features/transport-audio";
 import { WaveView } from "./features/wave-view";
 
 function App(): React.JSX.Element {
+  const { audioContextRef } = useTransportAudio();
   useAnalyzeAudio();
 
   return (
@@ -18,7 +22,7 @@ function App(): React.JSX.Element {
         justifyContent="left"
       >
         <AudioLoadComponent />
-        <TransportController />
+        <TransportController audioContextRef={audioContextRef} />
       </Stack>
       <WaveView />
     </Stack>

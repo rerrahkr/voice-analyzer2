@@ -26,8 +26,14 @@ export type TransportState = {
     current: TransportStateState;
     previous: TransportStateState;
   };
-  play: () => void;
-  pause: () => void;
+
+  elapsed: {
+    time: number;
+    lastStamp: number;
+  };
+
+  play: (current: number | undefined) => void;
+  pause: (current: number | undefined) => void;
   stop: () => void;
 };
 
@@ -38,21 +44,43 @@ export const useTransportState = create<TransportState>()(
       previous: "stopping",
     },
 
-    play: () => {
+    elapsed: {
+      time: 0,
+      lastStamp: 0,
+    },
+
+    play: (current: number | undefined) => {
       set((state) => {
         state.state = {
           current: "playing",
           previous: state.state.current,
         };
+        if (current) {
+          state.elapsed.lastStamp = current;
+        } else {
+          state.elapsed = {
+            time: 0,
+            lastStamp: 0,
+          };
+        }
       });
     },
 
-    pause: () => {
+    pause: (current: number | undefined) => {
       set((state) => {
         state.state = {
           current: "pausing",
           previous: state.state.current,
         };
+        if (current) {
+          state.elapsed.time += current - state.elapsed.lastStamp;
+          state.elapsed.lastStamp = current;
+        } else {
+          state.elapsed = {
+            time: 0,
+            lastStamp: 0,
+          };
+        }
       });
     },
 
@@ -61,6 +89,10 @@ export const useTransportState = create<TransportState>()(
         state.state = {
           current: "stopping",
           previous: state.state.current,
+        };
+        state.elapsed = {
+          time: 0,
+          lastStamp: 0,
         };
       });
     },
