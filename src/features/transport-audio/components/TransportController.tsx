@@ -10,35 +10,34 @@ import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import StopIcon from "@mui/icons-material/Stop";
 import ButtonGroup from "@mui/material/ButtonGroup";
 import IconButton from "@mui/material/IconButton";
-import type React from "react";
+import React from "react";
 import { useCallback } from "react";
-import { TransportMeter } from "./TransportMeter";
 
 type TransportControllerProps = {
-  audioContextRef: React.MutableRefObject<AudioContext | undefined>;
+  audioContextCurrentTimeGetter: () => number | undefined;
 };
 
-export function TransportController({
-  audioContextRef,
-}: TransportControllerProps): React.JSX.Element {
-  const { current: transportState } = useTransportStateState();
-  const play = usePlayAudio();
-  const pause = usePauseAudio();
-  const stop = useStopAudio();
-  const audio = useAudio();
+export const TransportController = React.memo(
+  ({
+    audioContextCurrentTimeGetter: getCurrentTime,
+  }: TransportControllerProps) => {
+    const { current: transportState } = useTransportStateState();
+    const play = usePlayAudio();
+    const pause = usePauseAudio();
+    const stop = useStopAudio();
+    const audio = useAudio();
 
-  const handlePlayPauseButtonClick = useCallback(() => {
-    if (transportState === "playing") {
-      pause(audioContextRef.current?.currentTime);
-    } else {
-      play(audioContextRef.current?.currentTime);
-    }
-  }, [transportState, play, pause, audioContextRef]);
+    const handlePlayPauseButtonClick = useCallback(() => {
+      if (transportState === "playing") {
+        pause(getCurrentTime());
+      } else {
+        play(getCurrentTime());
+      }
+    }, [transportState, play, pause, getCurrentTime]);
 
-  const disabled = audio === undefined;
+    const disabled = audio === undefined;
 
-  return (
-    <>
+    return (
       <ButtonGroup>
         <IconButton
           onClick={handlePlayPauseButtonClick}
@@ -51,7 +50,6 @@ export function TransportController({
           <StopIcon />
         </IconButton>
       </ButtonGroup>
-      <TransportMeter audioContextRef={audioContextRef} />
-    </>
-  );
-}
+    );
+  }
+);

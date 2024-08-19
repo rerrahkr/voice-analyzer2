@@ -1,5 +1,10 @@
-import { useAudio, useStopAudio, useTransportStateState } from "@/hooks";
-import { useEffect, useRef } from "react";
+import {
+  useAudio,
+  useElapsedTime,
+  useStopAudio,
+  useTransportStateState,
+} from "@/hooks";
+import { useCallback, useEffect, useRef } from "react";
 
 export function useTransportAudio() {
   const audio = useAudio();
@@ -7,7 +12,9 @@ export function useTransportAudio() {
   const audioContextRef = useRef<AudioContext>();
   const transportState = useTransportStateState();
   const stopAudio = useStopAudio();
+  const elapsed = useElapsedTime();
 
+  // Control playback.
   useEffect(() => {
     async function controlTransport() {
       switch (transportState.current) {
@@ -45,5 +52,18 @@ export function useTransportAudio() {
     });
   }, [transportState, audio, stopAudio]);
 
-  return { audioContextRef };
+  // Get current playing position
+  const getPlayingPosition = useCallback(() => {
+    const timeDiff = audioContextRef.current
+      ? audioContextRef.current.currentTime - elapsed.lastStamp
+      : 0;
+    return elapsed.time + timeDiff;
+  }, [elapsed]);
+
+  // Get current audio context time.
+  const getAudioContextCurrentTime = useCallback(() => {
+    return audioContextRef.current?.currentTime;
+  }, []);
+
+  return { getPlayingPosition, getAudioContextCurrentTime };
 }

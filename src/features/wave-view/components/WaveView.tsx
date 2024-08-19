@@ -2,8 +2,8 @@ import {
   ScrollableCanvas,
   type ScrollableCanvasElement,
 } from "@/components/ScrollableCanvas";
-import { useAudio, useElapsedTime, useTransportStateState } from "@/hooks";
-import type React from "react";
+import { useAudio, useTransportStateState } from "@/hooks";
+import React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 const WIDTH_PIXEL_RATE = 1000;
@@ -124,106 +124,98 @@ function draw(
 }
 
 type WaveViewProps = {
-  audioContextRef: React.MutableRefObject<AudioContext | undefined>;
+  playingPositionGetter: () => number;
 };
 
-export function WaveView({
-  audioContextRef,
-}: WaveViewProps): React.JSX.Element {
-  const canvasRef = useRef<ScrollableCanvasElement>(null);
+export const WaveView = React.memo(
+  ({ playingPositionGetter: getPlayingPosition }: WaveViewProps) => {
+    const canvasRef = useRef<ScrollableCanvasElement>(null);
 
-  const audio = useAudio();
+    const audio = useAudio();
 
-  const [scrollableCanvasStyleWidth, setScrillableCanvasStyleWidth] =
-    useState<string>("100%");
+    const [scrollableCanvasStyleWidth, setScrillableCanvasStyleWidth] =
+      useState<string>("100%");
 
-  const elapsed = useElapsedTime();
+    const drawCallback = useCallback(() => {
+      const canvas = canvasRef.current?.canvas;
+      const scroller = canvasRef.current?.scroller;
+      if (canvas && scroller) {
+        draw(canvas, audio, scroller.scrollLeft, getPlayingPosition());
+      }
+    }, [audio, getPlayingPosition]);
 
-  const getTransportTime = useCallback(() => {
-    const timeDiff = audioContextRef.current
-      ? audioContextRef.current.currentTime - elapsed.lastStamp
-      : 0;
-    return elapsed.time + timeDiff;
-  }, [audioContextRef.current, elapsed]);
+    useEffect(() => {
+      drawCallback();
+    }, [drawCallback]);
 
-  const drawCallback = useCallback(() => {
-    const canvas = canvasRef.current?.canvas;
-    const scroller = canvasRef.current?.scroller;
-    if (canvas && scroller) {
-      draw(canvas, audio, scroller.scrollLeft, getTransportTime());
-    }
-  }, [audio, getTransportTime]);
+    const requestIdRef = useRef<number>();
 
-  useEffect(() => {
-    drawCallback();
-  }, [drawCallback]);
+    const { current: transportState } = useTransportStateState();
 
-  const requestIdRef = useRef<number>();
+    const animate = useCallback(() => {
+      requestIdRef.current = requestAnimationFrame(animate);
+      drawCallback();
+    }, [drawCallback]);
 
-  const { current: transportState } = useTransportStateState();
-
-  const animate = useCallback(() => {
-    requestIdRef.current = requestAnimationFrame(animate);
-    drawCallback();
-  }, [drawCallback]);
-
-  useEffect(() => {
-    if (transportState === "playing") {
-      // Start animation.
-      animate();
-    } else {
-      if (requestIdRef.current) {
-        // Stop animation.
-        cancelAnimationFrame(requestIdRef.current);
-        requestIdRef.current = undefined;
+    useEffect(() => {
+      if (transportState === "playing") {
+        // Start animation.
+        animate();
       } else {
-        drawCallback();
+        if (requestIdRef.current) {
+          // Stop animation.
+          cancelAnimationFrame(requestIdRef.current);
+          requestIdRef.current = undefined;
+        } else {
+          drawCallback();
+        }
       }
-    }
 
-    return () => {
-      if (requestIdRef.current) {
-        cancelAnimationFrame(requestIdRef.current);
-        requestIdRef.current = undefined;
+      return () => {
+        if (requestIdRef.current) {
+          cancelAnimationFrame(requestIdRef.current);
+          requestIdRef.current = undefined;
+        }
+      };
+    }, [transportState, animate, drawCallback]);
+
+    useEffect(() => {
+      // Resize view width.
+      const canvas = canvasRef.current?.canvas;
+      const scroller = canvasRef.current?.scroller;
+      if (!canvas || !scroller) {
+        return;
       }
-    };
-  }, [transportState, animate, drawCallback]);
 
-  useEffect(() => {
-    // Resize view width.
-    const canvas = canvasRef.current?.canvas;
-    const scroller = canvasRef.current?.scroller;
-    if (!canvas || !scroller) {
-      return;
-    }
+      const canvasWidth = canvas.width;
+      const canvasStyleWidth = canvas.getBoundingClientRect().width;
 
-    const canvasWidth = canvas.width;
-    const canvasStyleWidth = canvas.getBoundingClientRect().width;
+      if (audio) {
+        const maxCanvasWidth =
+          (WIDTH_PIXEL_RATE * audio.length) / audio.sampleRate;
+        const scrollableWidth =
+          (maxCanvasWidth * canvasStyleWidth) / canvasWidth;
+        setScrillableCanvasStyleWidth(`${scrollableWidth}px`);
+      } else {
+        setScrillableCanvasStyleWidth("100%");
+      }
 
-    if (audio) {
-      const maxCanvasWidth =
-        (WIDTH_PIXEL_RATE * audio.length) / audio.sampleRate;
-      const scrollableWidth = (maxCanvasWidth * canvasStyleWidth) / canvasWidth;
-      setScrillableCanvasStyleWidth(`${scrollableWidth}px`);
-    } else {
-      setScrillableCanvasStyleWidth("100%");
-    }
+      scroller.scrollLeft = 0;
+    }, [audio]);
 
-    scroller.scrollLeft = 0;
-  }, [audio]);
-
-  return (
-    <ScrollableCanvas
-      style={{
-        width: "100%",
-        height: "100%",
-      }}
-      ref={canvasRef}
-      displayScrollbar
-      scrollableCanvasStyleWidth={scrollableCanvasStyleWidth}
-      scrollableCanvasStyleHeight="100%"
-      onResize={drawCallback}
-      onScroll={drawCallback}
-    />
-  );
-}
+    return (
+      <ScrollableCanvas
+        style={{
+          width: "100%",
+          height: "100%",
+        }}
+        ref={canvasRef}
+        displayScrollbar
+        scrollableCanvasStyleWidth={scrollableCanvasStyleWidth}
+        scrollableCanvasStyleHeight="100%"
+        onResize={drawCallback}
+        onScroll={drawCallback}
+      />
+    );
+  }
+);

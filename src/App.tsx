@@ -4,12 +4,14 @@ import { useAnalyzeAudio } from "./features/analyze-audio";
 import { AudioLoadComponent } from "./features/load-audio";
 import {
   TransportController,
+  TransportMeter,
   useTransportAudio,
 } from "./features/transport-audio";
 import { WaveView } from "./features/wave-view";
 
 function App(): React.JSX.Element {
-  const { audioContextRef } = useTransportAudio();
+  const { getPlayingPosition, getAudioContextCurrentTime } =
+    useTransportAudio();
   useAnalyzeAudio();
 
   return (
@@ -22,9 +24,12 @@ function App(): React.JSX.Element {
         justifyContent="left"
       >
         <AudioLoadComponent />
-        <TransportController audioContextRef={audioContextRef} />
+        <TransportController
+          audioContextCurrentTimeGetter={getAudioContextCurrentTime}
+        />
+        <TransportMeter playingPositionGetter={getPlayingPosition} />
       </Stack>
-      <WaveView audioContextRef={audioContextRef} />
+      <WaveView playingPositionGetter={getPlayingPosition} />
     </Stack>
   );
 }
