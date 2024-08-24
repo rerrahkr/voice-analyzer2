@@ -1,22 +1,26 @@
+import type { CustomComponentStyleProps } from "@/types";
 import { type SerializedStyles, css } from "@emotion/react";
 import type React from "react";
 import { forwardRef, useImperativeHandle, useRef } from "react";
-import { AutoResizedCanvas } from "./AutoResizedCanvas";
+import {
+  AutoResizedCanvas,
+  type AutoResizedCanvasBaseProps,
+} from "./AutoResizedCanvas";
 
 //----- Types.
-type ScrollableCanvasProps = Partial<{
-  staticCss: SerializedStyles | undefined;
-  style: React.CSSProperties | undefined;
-  displayScrollbar: boolean | undefined;
-  scrollableCanvasStyleWidth: React.CSSProperties["width"] | undefined;
-  scrollableCanvasStyleHeight: React.CSSProperties["height"] | undefined;
-  onScroll: React.UIEventHandler<HTMLDivElement> | undefined;
-  onHorizontalBarChange: ((offset: number) => void) | undefined;
-  onResize: ((canvas: HTMLCanvasElement) => void) | undefined;
-}>;
+export type ScrollableCanvasBaseProps = {
+  displayScrollbar?: boolean | undefined;
+  scrollableCanvasStyleWidth?: React.CSSProperties["width"] | undefined;
+  scrollableCanvasStyleHeight?: React.CSSProperties["height"] | undefined;
+  onScroll?: React.UIEventHandler<HTMLDivElement> | undefined;
+  onHorizontalBarChange?: ((offset: number) => void) | undefined;
+} & AutoResizedCanvasBaseProps;
+
+type ScrollableCanvasProps = ScrollableCanvasBaseProps &
+  CustomComponentStyleProps;
 
 export type ScrollableCanvasElement = {
-  readonly canvas: HTMLCanvasElement | null;
+  readonly layers: HTMLCanvasElement[];
   readonly scroller: HTMLDivElement | null;
 };
 
@@ -81,20 +85,21 @@ export const ScrollableCanvas = forwardRef<
     scrollableCanvasStyleWidth,
     scrollableCanvasStyleHeight,
     onScroll,
+    layers,
     onResize,
     staticCss: containerCustomCss,
     style: containerCustomStyle,
   } = props;
 
   // Modify external refs.
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement[]>([]);
   const scrollerRef = useRef<HTMLDivElement>(null);
 
   useImperativeHandle(
     ref,
     () =>
       ({
-        get canvas() {
+        get layers() {
           return canvasRef.current;
         },
         get scroller() {
@@ -111,6 +116,7 @@ export const ScrollableCanvas = forwardRef<
       <div css={[componentCss.canvasWrapper, scrollbarCss(displayScrollbar)]}>
         <AutoResizedCanvas
           ref={canvasRef}
+          layers={layers}
           onResize={onResize}
           staticCss={componentCss.canvas}
         />

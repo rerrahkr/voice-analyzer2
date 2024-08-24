@@ -1,49 +1,53 @@
-import { type SerializedStyles, css } from "@emotion/react";
+import type { CustomComponentStyleProps } from "@/types";
+import { range } from "@/utils/range";
+import { css } from "@emotion/react";
 import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
 
-type AutoResizedCanvasProps = {
+export type AutoResizedCanvasBaseProps = {
   /**
-   * Static style for container element.
+   * Number of
    */
-  staticCss?: SerializedStyles | undefined;
-
-  /**
-   * Dynamic style for container element.
-   */
-  style?: React.CSSProperties | undefined;
+  layers?: number | undefined;
 
   /**
    * Event handler called when the canvas is resized.
    * @param canvas Canvas element.
    */
-  onResize?: ((canvas: HTMLCanvasElement) => void) | undefined;
+  onResize?: (() => void) | undefined;
 };
 
+type AutoResizedCanvasProps = AutoResizedCanvasBaseProps &
+  CustomComponentStyleProps;
+
 const componentCss = {
+  container: css`
+    position: relative;
+  `,
+
   canvas: css`
     display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
   `,
 };
 
 /**
- * Canvas component whose size is streched to its parent rectangle.
+ * Canvas component whose size is stretched to its parent rectangle.
  */
 export const AutoResizedCanvas = forwardRef<
-  HTMLCanvasElement,
+  HTMLCanvasElement[],
   AutoResizedCanvasProps
 >((props, ref) => {
   const {
-    onResize,
+    layers = 1,
     staticCss: containerCustomCss,
     style: containerCustomStyle,
+    onResize,
   } = props;
 
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  useImperativeHandle<HTMLCanvasElement | null, HTMLCanvasElement | null>(
-    ref,
-    () => canvasRef.current,
-    []
-  );
+  const canvasMapRef = useRef(new Map<number, HTMLCanvasElement>());
+  useImperativeHandle(ref, () => [...canvasMapRef.current.values()], []);
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -53,33 +57,29 @@ export const AutoResizedCanvas = forwardRef<
       return;
     }
 
-    const observer = new ResizeObserver((entries) => {
-      const canvas = canvasRef.current;
-      const entry = entries[0];
-      if (!entry || !canvas) {
-        return;
+    const observer = new ResizeObserver(([entry]) => {
+      for (const [, canvas] of canvasMapRef.current) {
+        const directionIsHorizontal =
+          getComputedStyle(canvas).writingMode.startsWith("horizontal");
+
+        {
+          const size = entry.devicePixelContentBoxSize[0];
+          canvas.height = directionIsHorizontal
+            ? size.blockSize
+            : size.inlineSize;
+          canvas.width = directionIsHorizontal
+            ? size.inlineSize
+            : size.blockSize;
+        }
+
+        {
+          const size = entry.contentBoxSize[0];
+          canvas.style.height = `${directionIsHorizontal ? size.blockSize : size.inlineSize}px`;
+          canvas.style.width = `${directionIsHorizontal ? size.inlineSize : size.blockSize}px`;
+        }
       }
 
-      const directionIsHorizontal =
-        getComputedStyle(canvas).writingMode.startsWith("horizontal");
-
-      {
-        const size = entry.devicePixelContentBoxSize[0];
-        canvas.height = directionIsHorizontal
-          ? size.blockSize
-          : size.inlineSize;
-        canvas.width = directionIsHorizontal ? size.inlineSize : size.blockSize;
-      }
-
-      {
-        const size = entry.contentBoxSize[0];
-        canvas.style.height = `${directionIsHorizontal ? size.blockSize : size.inlineSize}px`;
-        canvas.style.width = `${directionIsHorizontal ? size.inlineSize : size.blockSize}px`;
-      }
-
-      if (onResize) {
-        onResize(canvas);
-      }
+      onResize?.();
     });
     observer.observe(container, { box: "device-pixel-content-box" });
 
@@ -91,12 +91,24 @@ export const AutoResizedCanvas = forwardRef<
   return (
     <div
       ref={containerRef}
-      css={containerCustomCss}
+      css={[componentCss.container, containerCustomCss]}
       style={containerCustomStyle}
     >
-      <canvas ref={canvasRef} css={componentCss.canvas}>
-        Canvas is not supported in this browser.
-      </canvas>
+      {[...range(0, Math.max(layers, 1))].map((i) => (
+        <canvas
+          key={i}
+          ref={(node) => {
+            if (node) {
+              canvasMapRef.current.set(i, node);
+            } else {
+              canvasMapRef.current.delete(i);
+            }
+          }}
+          css={componentCss.canvas}
+        >
+          Canvas is not supported in this browser.
+        </canvas>
+      ))}
     </div>
   );
 });
