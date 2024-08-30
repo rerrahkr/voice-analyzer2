@@ -1,9 +1,11 @@
 import {
   type AudioState,
   type F0State,
+  type SyncViewsState,
   type TransportState,
   useAudioStore,
   useF0State,
+  useSyncViewsState,
   useTransportState,
 } from "./store";
 
@@ -35,6 +37,15 @@ export function usePauseAudio(): TransportState["pause"] {
 
 export function useStopAudio(): TransportState["stop"] {
   return useTransportState((state) => state.stop);
+}
+
+// Hooks for synchronized views.
+export function useViewShouldFollowPlayback(): SyncViewsState["shouldFollowPlayback"] {
+  return useSyncViewsState((state) => state.shouldFollowPlayback);
+}
+
+export function useToggleViewFollowPlayback(): SyncViewsState["toggleFollowPlayback"] {
+  return useSyncViewsState((state) => state.toggleFollowPlayback);
 }
 
 // Hooks for F0.

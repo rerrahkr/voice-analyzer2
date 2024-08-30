@@ -2,14 +2,21 @@ import {
   ScrollableCanvas,
   type ScrollableCanvasElement,
 } from "@/components/ScrollableCanvas";
-import { useAudio, useTransportStateState } from "@/hooks";
+import {
+  useAudio,
+  useTransportStateState,
+  useViewShouldFollowPlayback,
+} from "@/hooks";
+import { clearCanvasContext, getCanvasContext2D } from "@/utils/canvas";
 import React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   WIDTH_PIXEL_RATE,
   drawGrid,
   drawPlaybackPositionLayer,
-  drawWaveLayer,
+  drawWave,
+  isTimeWithinCanvasBounds,
+  timeToCanvasX,
 } from "../draw";
 
 const LAYER_INDEX = {
@@ -29,16 +36,43 @@ export const WaveView = React.memo(
 
     const drawAllLayers = useCallback(() => {
       const { layers, scroller } = canvasRef.current || {};
-      if (layers && scroller) {
-        drawGrid(layers[LAYER_INDEX.GRID], scroller.scrollLeft);
+      if (!layers || !scroller) {
+        return;
+      }
 
-        drawPlaybackPositionLayer(
-          layers[LAYER_INDEX.PLAYBACK],
-          scroller.scrollLeft,
-          getPlayingPosition()
-        );
+      const gridContext = getCanvasContext2D(layers[LAYER_INDEX.GRID]);
+      if (gridContext) {
+        clearCanvasContext(gridContext);
+        drawGrid(gridContext, scroller.scrollLeft);
+      }
 
-        drawWaveLayer(layers[LAYER_INDEX.WAVE], audio, scroller.scrollLeft);
+      const playbackContext = getCanvasContext2D(layers[LAYER_INDEX.PLAYBACK]);
+      if (playbackContext) {
+        clearCanvasContext(playbackContext);
+
+        const currentTime = getPlayingPosition();
+        if (
+          isTimeWithinCanvasBounds(
+            currentTime,
+            scroller.scrollLeft,
+            playbackContext.canvas.getBoundingClientRect().width,
+            playbackContext.canvas.width
+          )
+        ) {
+          drawPlaybackPositionLayer(
+            playbackContext,
+            scroller.scrollLeft,
+            currentTime
+          );
+        }
+      }
+
+      const waveContext = getCanvasContext2D(layers[LAYER_INDEX.WAVE]);
+      if (waveContext) {
+        clearCanvasContext(waveContext);
+        if (audio) {
+          drawWave(waveContext, audio, scroller.scrollLeft);
+        }
       }
     }, [audio, getPlayingPosition]);
 
@@ -49,16 +83,36 @@ export const WaveView = React.memo(
 
     // Control playback animation.
     const { current: transportState } = useTransportStateState();
+    const shouldFollowPlayback = useViewShouldFollowPlayback();
     const drawPositionLayer = useCallback(() => {
       const { layers, scroller } = canvasRef.current || {};
-      if (layers && scroller) {
-        drawPlaybackPositionLayer(
-          layers[LAYER_INDEX.PLAYBACK],
-          scroller.scrollLeft,
-          getPlayingPosition()
-        );
+      const context = getCanvasContext2D(layers?.[LAYER_INDEX.PLAYBACK]);
+      if (!context || !scroller) {
+        return;
       }
-    }, [getPlayingPosition]);
+
+      clearCanvasContext(context);
+
+      const currentTime = getPlayingPosition();
+      const styleWidth = context.canvas.getBoundingClientRect().width;
+      if (
+        !isTimeWithinCanvasBounds(
+          currentTime,
+          scroller.scrollLeft,
+          styleWidth,
+          context.canvas.width
+        )
+      ) {
+        if (shouldFollowPlayback) {
+          const left =
+            (timeToCanvasX(currentTime) * styleWidth) / context.canvas.width;
+          scroller.scrollTo({ left, behavior: "instant" });
+        }
+        return;
+      }
+
+      drawPlaybackPositionLayer(context, scroller.scrollLeft, currentTime);
+    }, [getPlayingPosition, shouldFollowPlayback]);
 
     const requestIdRef = useRef<number>();
 

@@ -1,6 +1,8 @@
+import Divider from "@mui/material/Divider";
 import Stack from "@mui/material/Stack";
 import type React from "react";
 import { useAnalyzeAudio } from "./features/analyze-audio";
+import { ViewsController } from "./features/control-views";
 import { AudioLoadComponent } from "./features/load-audio";
 import {
   TransportController,
@@ -24,10 +26,13 @@ function App(): React.JSX.Element {
         justifyContent="left"
       >
         <AudioLoadComponent />
+        <Divider orientation="vertical" />
         <TransportController
           audioContextCurrentTimeGetter={getAudioContextCurrentTime}
         />
         <TransportMeter playingPositionGetter={getPlayingPosition} />
+        <Divider orientation="vertical" />
+        <ViewsController />
       </Stack>
       <WaveView playingPositionGetter={getPlayingPosition} />
     </Stack>

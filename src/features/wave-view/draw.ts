@@ -1,44 +1,73 @@
 export const WIDTH_PIXEL_RATE = 1000;
 
+/**
+ * Convert second to x-position on canvas.
+ * @param time Second.
+ * @returns X position.
+ */
+export function timeToCanvasX(time: number): number {
+  return time * WIDTH_PIXEL_RATE;
+}
+
+/**
+ * Convert x-position in canvas to second.
+ * @param x X position.
+ * @returns Second.
+ */
+export function canvasXToTime(x: number): number {
+  return x / WIDTH_PIXEL_RATE;
+}
+
+/**
+ * Validate position of time is within canvas bounds.
+ * @param time Seconds.
+ * @param scrollOffset Style-based x offset of canvas.
+ * @param styleWidth Style-base canvas width.
+ * @param canvasWidth Resolution-based canvas width.
+ * @returns true when given time is displayed in canvas.
+ */
+export function isTimeWithinCanvasBounds(
+  time: number,
+  scrollOffset: number,
+  styleWidth: number,
+  canvasWidth: number
+): boolean {
+  const transportStyleX = (timeToCanvasX(time) * styleWidth) / canvasWidth;
+  const transportViewportStyleX = transportStyleX - scrollOffset;
+  return 0 <= transportViewportStyleX && transportViewportStyleX <= styleWidth;
+}
+
+/**
+ * @param context
+ * @param scrollOffset
+ * @param transportTime
+ * @returns true when position line is drawn in canvas.
+ */
 export function drawPlaybackPositionLayer(
-  canvas: HTMLCanvasElement,
+  context: CanvasRenderingContext2D,
   scrollOffset: number,
   transportTime: number
 ) {
-  const context = canvas.getContext("2d");
-  if (!context) {
-    return;
-  }
+  const { width, height } = context.canvas;
+  const styleWidth = context.canvas.getBoundingClientRect().width;
+  const canvasOffset = (scrollOffset * width) / styleWidth;
+  const canvasTime = timeToCanvasX(transportTime);
+  const x = canvasTime - canvasOffset;
 
-  context.clearRect(0, 0, canvas.width, canvas.height);
+  context.strokeStyle = "black";
 
-  // Draw transport line.
-  const resolutionStyleRate =
-    canvas.width / canvas.getBoundingClientRect().width;
-  const multiplier = resolutionStyleRate / WIDTH_PIXEL_RATE;
-  const timeLeft = scrollOffset * multiplier;
-  const timeRight = (scrollOffset + canvas.width) * multiplier;
-
-  if (timeLeft <= transportTime && transportTime <= timeRight) {
-    context.strokeStyle = "black";
-
-    context.beginPath();
-    const x = (transportTime - timeLeft) * WIDTH_PIXEL_RATE;
-    context.moveTo(x, 0);
-    context.lineTo(x, canvas.height);
-    context.stroke();
-  }
+  context.beginPath();
+  context.moveTo(x, 0);
+  context.lineTo(x, height);
+  context.stroke();
 }
 
-export function drawGrid(canvas: HTMLCanvasElement, scrollOffset: number) {
-  const context = canvas.getContext("2d");
-  if (!context) {
-    return;
-  }
-
-  context.clearRect(0, 0, canvas.width, canvas.height);
-
-  const centerY = canvas.height / 2;
+export function drawGrid(
+  context: CanvasRenderingContext2D,
+  scrollOffset: number
+) {
+  const { width, height } = context.canvas;
+  const centerY = height / 2;
 
   // Draw zero-line.
   context.strokeStyle = "grey";
@@ -46,21 +75,19 @@ export function drawGrid(canvas: HTMLCanvasElement, scrollOffset: number) {
 
   context.beginPath();
   context.moveTo(0, centerY);
-  context.lineTo(canvas.width, centerY);
+  context.lineTo(width, centerY);
   context.stroke();
 
   // Draw time lines.
-  const canvasLeft =
-    (scrollOffset * canvas.width) / canvas.getBoundingClientRect().width;
-  const timeLeft = canvasLeft / WIDTH_PIXEL_RATE;
+  const styleWidth = context.canvas.getBoundingClientRect().width;
+  const canvasLeft = (scrollOffset * width) / styleWidth;
+  const timeLeft = canvasXToTime(canvasLeft);
 
-  const canvasRight =
-    ((scrollOffset + canvas.getBoundingClientRect().width) * canvas.width) /
-    canvas.getBoundingClientRect().width;
-  const timeRight = canvasRight / WIDTH_PIXEL_RATE;
+  const canvasRight = ((scrollOffset + styleWidth) * width) / styleWidth;
+  const timeRight = canvasXToTime(canvasRight);
 
   context.textBaseline = "top";
-  context.font = `0.8em ${getComputedStyle(canvas).fontFamily}`;
+  context.font = `0.8em ${getComputedStyle(context.canvas).fontFamily}`;
   context.fillStyle = "grey";
 
   const GRID_TIME = 0.1;
@@ -82,33 +109,23 @@ export function drawGrid(canvas: HTMLCanvasElement, scrollOffset: number) {
 
     context.beginPath();
     context.moveTo(x, 0);
-    context.lineTo(x, canvas.height);
+    context.lineTo(x, height);
     context.stroke();
   }
 }
 
-export function drawWaveLayer(
-  canvas: HTMLCanvasElement,
-  audio: AudioBuffer | undefined,
+export function drawWave(
+  context: CanvasRenderingContext2D,
+  audio: AudioBuffer,
   scrollOffset: number
 ) {
-  const context = canvas.getContext("2d");
-  if (!context) {
-    return;
-  }
-
-  context.clearRect(0, 0, canvas.width, canvas.height);
-
-  // Draw samples.
-  if (!audio) {
-    return;
-  }
-
   const samples = audio.getChannelData(0);
 
-  const centerY = canvas.height / 2;
+  const { width, height } = context.canvas;
+  const centerY = height / 2;
   const MAX_HEIGHT_PIXEL = 800;
-  const maxDrawableHeight = Math.min(canvas.height, MAX_HEIGHT_PIXEL);
+  const maxDrawableHeight = Math.min(height, MAX_HEIGHT_PIXEL);
+  const styleWidth = context.canvas.getBoundingClientRect().width;
 
   context.strokeStyle = "red";
 
@@ -116,39 +133,32 @@ export function drawWaveLayer(
 
   if (WIDTH_PIXEL_RATE < audio.sampleRate) {
     // Selection drawing.
-    const xOffset = Math.round(
-      (scrollOffset * canvas.width) / canvas.getBoundingClientRect().width
-    );
+    const xOffset = Math.round((scrollOffset * width) / styleWidth);
     context.moveTo(
       0,
       centerY -
         maxDrawableHeight *
-          samples[Math.round((audio.sampleRate * xOffset) / WIDTH_PIXEL_RATE)]
+          samples[Math.round(audio.sampleRate * canvasXToTime(xOffset))]
     );
 
-    for (let x = 0; x < canvas.width; x++) {
+    for (let x = 0; x < width; x++) {
       context.lineTo(
         x,
         centerY -
           maxDrawableHeight *
-            samples[
-              Math.round((audio.sampleRate * (xOffset + x)) / WIDTH_PIXEL_RATE)
-            ]
+            samples[Math.round(audio.sampleRate * canvasXToTime(xOffset + x))]
       );
     }
   } else {
     // Draw all samples.
-    const canvasOffset =
-      (scrollOffset * canvas.width) / canvas.getBoundingClientRect().width;
+    const canvasOffset = (scrollOffset * width) / styleWidth;
     const firstDrawableIndex = (() => {
-      const timeOffset = canvasOffset / WIDTH_PIXEL_RATE;
+      const timeOffset = canvasXToTime(canvasOffset);
       return Math.floor(timeOffset * audio.sampleRate);
     })();
     const lastDrawableIndex = (() => {
-      const canvasRight =
-        ((scrollOffset + canvas.getBoundingClientRect().width) * canvas.width) /
-        canvas.getBoundingClientRect().width;
-      const timeRight = canvasRight / WIDTH_PIXEL_RATE;
+      const canvasRight = ((scrollOffset + styleWidth) * width) / styleWidth;
+      const timeRight = canvasXToTime(canvasRight);
       return Math.min(
         Math.ceil(timeRight * audio.sampleRate),
         audio.length - 1
@@ -156,13 +166,13 @@ export function drawWaveLayer(
     })();
 
     context.moveTo(
-      (WIDTH_PIXEL_RATE * firstDrawableIndex) / audio.sampleRate,
+      timeToCanvasX(firstDrawableIndex / audio.sampleRate),
       centerY - maxDrawableHeight * samples[firstDrawableIndex]
     );
 
     for (let i = firstDrawableIndex; i <= lastDrawableIndex; i++) {
       context.lineTo(
-        (WIDTH_PIXEL_RATE * i) / audio.sampleRate,
+        timeToCanvasX(i / audio.sampleRate),
         centerY - maxDrawableHeight * samples[i]
       );
     }

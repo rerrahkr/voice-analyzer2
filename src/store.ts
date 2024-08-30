@@ -99,6 +99,24 @@ export const useTransportState = create<TransportState>()(
   }))
 );
 
+// State for synchronized views.
+export type SyncViewsState = {
+  shouldFollowPlayback: boolean;
+  toggleFollowPlayback: () => void;
+};
+
+export const useSyncViewsState = create<SyncViewsState>()(
+  immer((set) => ({
+    shouldFollowPlayback: true,
+
+    toggleFollowPlayback: () => {
+      set((state) => {
+        state.shouldFollowPlayback = !state.shouldFollowPlayback;
+      });
+    },
+  }))
+);
+
 // State for F0.
 export type F0State = {
   f0Info?: F0Info;
