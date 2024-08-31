@@ -122,17 +122,22 @@ export const WaveView = React.memo(
     }, [drawPositionLayer]);
 
     useEffect(() => {
-      if (transportState === "playing") {
-        // Start animation.
-        animate();
-      } else {
-        if (requestIdRef.current) {
-          // Stop animation.
-          cancelAnimationFrame(requestIdRef.current);
-          requestIdRef.current = undefined;
-        } else {
-          drawPositionLayer();
-        }
+      switch (transportState) {
+        case "playing":
+          animate(); // Start animation.
+          break;
+
+        case "stopping":
+          if (shouldFollowPlayback) {
+            canvasRef.current?.scroller?.scrollTo({
+              left: 0,
+              behavior: "instant",
+            });
+          }
+          break;
+
+        default:
+          break;
       }
 
       return () => {
@@ -141,7 +146,7 @@ export const WaveView = React.memo(
           requestIdRef.current = undefined;
         }
       };
-    }, [transportState, animate, drawPositionLayer]);
+    }, [transportState, animate, shouldFollowPlayback]);
 
     // Resize view width after loading audio.
     const [scrollableCanvasStyleWidth, setScrollableCanvasStyleWidth] =
