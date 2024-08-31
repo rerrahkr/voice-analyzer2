@@ -102,16 +102,16 @@ export const useTransportState = create<TransportState>()(
 // State for synchronized views.
 export type SyncViewsState = {
   shouldFollowPlayback: boolean;
-  toggleFollowPlayback: () => void;
+  enableFollowPlayback: (enabled: boolean) => void;
 };
 
 export const useSyncViewsState = create<SyncViewsState>()(
   immer((set) => ({
     shouldFollowPlayback: true,
 
-    toggleFollowPlayback: () => {
+    enableFollowPlayback: (enabled: boolean) => {
       set((state) => {
-        state.shouldFollowPlayback = !state.shouldFollowPlayback;
+        state.shouldFollowPlayback = enabled;
       });
     },
   }))

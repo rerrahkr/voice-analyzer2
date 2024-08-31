@@ -4,6 +4,7 @@ import {
 } from "@/components/ScrollableCanvas";
 import {
   useAudio,
+  useEnableViewFollowPlayback,
   useTransportStateState,
   useViewShouldFollowPlayback,
 } from "@/hooks";
@@ -175,6 +176,12 @@ export const WaveView = React.memo(
       scroller.scrollLeft = 0;
     }, [audio]);
 
+    // Turn off following playback.
+    const enableFollowPlayback = useEnableViewFollowPlayback();
+    const turnOffFollowingPlayback = useCallback(() => {
+      enableFollowPlayback(false);
+    }, [enableFollowPlayback]);
+
     return (
       <ScrollableCanvas
         style={{
@@ -188,6 +195,7 @@ export const WaveView = React.memo(
         layers={3}
         onResize={drawAllLayers}
         onScroll={drawAllLayers}
+        onPointerDown={turnOffFollowingPlayback}
       />
     );
   }

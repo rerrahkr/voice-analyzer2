@@ -44,8 +44,8 @@ export function useViewShouldFollowPlayback(): SyncViewsState["shouldFollowPlayb
   return useSyncViewsState((state) => state.shouldFollowPlayback);
 }
 
-export function useToggleViewFollowPlayback(): SyncViewsState["toggleFollowPlayback"] {
-  return useSyncViewsState((state) => state.toggleFollowPlayback);
+export function useEnableViewFollowPlayback(): SyncViewsState["enableFollowPlayback"] {
+  return useSyncViewsState((state) => state.enableFollowPlayback);
 }
 
 // Hooks for F0.
