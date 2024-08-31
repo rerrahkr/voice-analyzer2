@@ -17,23 +17,38 @@ function App(): React.JSX.Element {
   useAnalyzeAudio();
 
   return (
-    <Stack direction="column" alignItems="stretch" width="1" height="100vh">
+    <Stack
+      direction="column"
+      sx={{
+        width: 1,
+        height: "100vh",
+        alignItems: "stretch",
+      }}
+    >
       <Stack
         component="header"
         direction="row"
-        gap={2}
-        alignItems="center"
-        justifyContent="left"
+        sx={{
+          p: 1,
+          gap: 1,
+          alignItems: "center",
+          justifyContent: "left",
+          flexWrap: "wrap",
+          backgroundColor: "#ffffea",
+          boxShadow: 2,
+          zIndex: 100,
+        }}
       >
         <AudioLoadComponent />
-        <Divider orientation="vertical" />
+        <Divider orientation="vertical" flexItem />
         <TransportController
           audioContextCurrentTimeGetter={getAudioContextCurrentTime}
         />
         <TransportMeter playingPositionGetter={getPlayingPosition} />
-        <Divider orientation="vertical" />
+        <Divider orientation="vertical" flexItem />
         <ViewsController />
       </Stack>
+
       <WaveView playingPositionGetter={getPlayingPosition} />
     </Stack>
   );

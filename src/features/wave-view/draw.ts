@@ -67,16 +67,6 @@ export function drawGrid(
   scrollOffset: number
 ) {
   const { width, height } = context.canvas;
-  const centerY = height / 2;
-
-  // Draw zero-line.
-  context.strokeStyle = "grey";
-  context.lineWidth = 1;
-
-  context.beginPath();
-  context.moveTo(0, centerY);
-  context.lineTo(width, centerY);
-  context.stroke();
 
   // Draw time lines.
   const styleWidth = context.canvas.getBoundingClientRect().width;
@@ -87,7 +77,7 @@ export function drawGrid(
   const timeRight = canvasXToTime(canvasRight);
 
   context.textBaseline = "top";
-  context.font = `0.8em ${getComputedStyle(context.canvas).fontFamily}`;
+  context.font = `1em ${getComputedStyle(context.canvas).fontFamily}`;
   context.fillStyle = "grey";
 
   const GRID_TIME = 0.1;
@@ -105,13 +95,24 @@ export function drawGrid(
     }
 
     const x = Math.round((time - timeLeft) * WIDTH_PIXEL_RATE);
-    context.fillText(time.toFixed(3), x + 4, 4);
+    context.fillText(time.toFixed(3), x + 6, 12);
 
     context.beginPath();
     context.moveTo(x, 0);
     context.lineTo(x, height);
     context.stroke();
   }
+
+  // Draw zero-line.
+  const centerY = height / 2;
+
+  context.strokeStyle = "grey";
+  context.lineWidth = 1;
+
+  context.beginPath();
+  context.moveTo(0, centerY);
+  context.lineTo(width, centerY);
+  context.stroke();
 }
 
 export function drawWave(

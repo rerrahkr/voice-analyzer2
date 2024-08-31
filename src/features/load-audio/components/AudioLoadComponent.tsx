@@ -1,35 +1,38 @@
+import { Tooltip } from "@mui/material";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import type React from "react";
+import React from "react";
 import { useLoadAudio } from "../hooks";
 import { FileInputButton } from "./FileInputButton";
 
-export function AudioLoadComponent(): React.JSX.Element {
+export const AudioLoadComponent = React.memo((): React.JSX.Element => {
   const { fileName, handleFileChange } = useLoadAudio();
 
   return (
     <Stack direction="row" gap={1} alignItems="center" justifyContent="center">
-      <FileInputButton
-        id="fileInput"
-        variant="contained"
-        accept=".wav"
-        forceChange
-        onChange={handleFileChange}
-      >
-        Open
-      </FileInputButton>
+      <Tooltip title="Open">
+        <span>
+          <FileInputButton
+            id="fileInput"
+            variant="contained"
+            accept=".wav"
+            forceChange
+            onChange={handleFileChange}
+          />
+        </span>
+      </Tooltip>
       <Typography
         component="label"
         htmlFor="fileInput"
-        overflow="hidden"
-        whiteSpace="nowrap"
-        textOverflow="ellipsis"
         sx={{
           width: 100,
+          overflow: "hidden",
+          whiteSpace: "nowrap",
+          textOverflow: "ellipsis",
         }}
       >
         {fileName || "---"}
       </Typography>
     </Stack>
   );
-}
+});
