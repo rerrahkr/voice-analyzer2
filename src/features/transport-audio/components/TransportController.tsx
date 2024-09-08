@@ -14,52 +14,44 @@ import Tooltip from "@mui/material/Tooltip";
 import React from "react";
 import { useCallback } from "react";
 
-type TransportControllerProps = {
-  audioContextCurrentTimeGetter: () => number | undefined;
-};
+export const TransportController = React.memo(() => {
+  const { current: transportState } = useTransportStateState();
+  const play = usePlayAudio();
+  const pause = usePauseAudio();
+  const stop = useStopAudio();
+  const audio = useAudio();
 
-export const TransportController = React.memo(
-  ({
-    audioContextCurrentTimeGetter: getCurrentTime,
-  }: TransportControllerProps) => {
-    const { current: transportState } = useTransportStateState();
-    const play = usePlayAudio();
-    const pause = usePauseAudio();
-    const stop = useStopAudio();
-    const audio = useAudio();
+  const handlePlayPauseButtonClick = useCallback(() => {
+    if (transportState === "playing") {
+      pause();
+    } else {
+      play();
+    }
+  }, [transportState, play, pause]);
 
-    const handlePlayPauseButtonClick = useCallback(() => {
-      if (transportState === "playing") {
-        pause(getCurrentTime());
-      } else {
-        play(getCurrentTime());
-      }
-    }, [transportState, play, pause, getCurrentTime]);
+  const disabled = audio === undefined;
+  const shouldDisplayPause = transportState === "playing";
 
-    const disabled = audio === undefined;
-    const shouldDisplayPause = transportState === "playing";
-
-    return (
-      <ButtonGroup>
-        <Tooltip title={shouldDisplayPause ? "Pause" : "Play"}>
-          <span>
-            <IconButton
-              onClick={handlePlayPauseButtonClick}
-              aria-label="playOrPause"
-              disabled={disabled}
-            >
-              {shouldDisplayPause ? <PauseIcon /> : <PlayArrowIcon />}
-            </IconButton>
-          </span>
-        </Tooltip>
-        <Tooltip title="Stop">
-          <span>
-            <IconButton onClick={stop} aria-label="stop" disabled={disabled}>
-              <StopIcon />
-            </IconButton>
-          </span>
-        </Tooltip>
-      </ButtonGroup>
-    );
-  }
-);
+  return (
+    <ButtonGroup>
+      <Tooltip title={shouldDisplayPause ? "Pause" : "Play"}>
+        <span>
+          <IconButton
+            onClick={handlePlayPauseButtonClick}
+            aria-label="playOrPause"
+            disabled={disabled}
+          >
+            {shouldDisplayPause ? <PauseIcon /> : <PlayArrowIcon />}
+          </IconButton>
+        </span>
+      </Tooltip>
+      <Tooltip title="Stop">
+        <span>
+          <IconButton onClick={stop} aria-label="stop" disabled={disabled}>
+            <StopIcon />
+          </IconButton>
+        </span>
+      </Tooltip>
+    </ButtonGroup>
+  );
+});

@@ -1,4 +1,4 @@
-export const WIDTH_PIXEL_RATE = 1000;
+const WIDTH_PIXEL_RATE = 1000;
 
 /**
  * Convert second to x-position on canvas.

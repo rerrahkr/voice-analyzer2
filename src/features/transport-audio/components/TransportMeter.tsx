@@ -45,13 +45,7 @@ export const TransportMeter = React.memo((props: TransportMeterProps) => {
         requestIdRef.current = undefined;
       } else {
         // Only update text.
-        if (transportState === "stopping") {
-          // Force reset here not leave old position,
-          // because transport state is changed before audio context is killed.
-          setTime(0);
-        } else {
-          setMsecTime();
-        }
+        setMsecTime();
       }
     }
 

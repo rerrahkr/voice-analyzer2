@@ -23,10 +23,6 @@ export function useTransportStateState(): TransportState["state"] {
   return useTransportState((state) => state.state);
 }
 
-export function useElapsedTime(): TransportState["elapsed"] {
-  return useTransportState((state) => state.elapsed);
-}
-
 export function usePlayAudio(): TransportState["play"] {
   return useTransportState((state) => state.play);
 }

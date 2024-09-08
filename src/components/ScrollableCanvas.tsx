@@ -14,6 +14,7 @@ export type ScrollableCanvasBaseProps = {
   scrollableCanvasStyleHeight?: React.CSSProperties["height"] | undefined;
   onScroll?: React.UIEventHandler<HTMLDivElement> | undefined;
   onPointerDown?: React.PointerEventHandler<HTMLDivElement> | undefined;
+  onWheel?: React.WheelEventHandler<HTMLDivElement> | undefined;
 } & AutoResizedCanvasBaseProps;
 
 type ScrollableCanvasProps = ScrollableCanvasBaseProps &
@@ -86,6 +87,7 @@ export const ScrollableCanvas = forwardRef<
     scrollableCanvasStyleHeight,
     onScroll,
     onPointerDown,
+    onWheel,
     layers,
     onResize,
     staticCss: containerCustomCss,
@@ -113,7 +115,6 @@ export const ScrollableCanvas = forwardRef<
     <div
       css={[containerCustomCss, componentCss.container]}
       style={containerCustomStyle}
-      onPointerDown={onPointerDown}
     >
       <div css={[componentCss.canvasWrapper, scrollbarCss(displayScrollbar)]}>
         <AutoResizedCanvas
@@ -125,6 +126,8 @@ export const ScrollableCanvas = forwardRef<
       </div>
       <div
         onScroll={onScroll}
+        onPointerDown={onPointerDown}
+        onWheel={onWheel}
         css={[componentCss.scroller, scrollbarCss(displayScrollbar)]}
         ref={scrollerRef}
       >

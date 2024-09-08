@@ -12,8 +12,7 @@ import {
 import { WaveView } from "./features/wave-view";
 
 function App(): React.JSX.Element {
-  const { getPlayingPosition, getAudioContextCurrentTime } =
-    useTransportAudio();
+  const { getPlayingPosition, setPlayingPosition } = useTransportAudio();
   useAnalyzeAudio();
 
   return (
@@ -41,15 +40,16 @@ function App(): React.JSX.Element {
       >
         <AudioLoadComponent />
         <Divider orientation="vertical" flexItem />
-        <TransportController
-          audioContextCurrentTimeGetter={getAudioContextCurrentTime}
-        />
+        <TransportController />
         <TransportMeter playingPositionGetter={getPlayingPosition} />
         <Divider orientation="vertical" flexItem />
         <ViewsController />
       </Stack>
 
-      <WaveView playingPositionGetter={getPlayingPosition} />
+      <WaveView
+        playingPositionGetter={getPlayingPosition}
+        playingPositionSetter={setPlayingPosition}
+      />
     </Stack>
   );
 }
