@@ -18,6 +18,14 @@ export function useSetAudio(): AudioState["setAudio"] {
   return useAudioStore((state) => state.setAudio);
 }
 
+export function useAudioIsLoading(): AudioState["audioIsLoading"] {
+  return useAudioStore((state) => state.audioIsLoading);
+}
+
+export function useSetAudioIsLoading(): AudioState["setAudioIsLoading"] {
+  return useAudioStore((state) => state.setAudioIsLoading);
+}
+
 // Hooks for audio transport.
 export function useTransportStateState(): TransportState["state"] {
   return useTransportState((state) => state.state);

@@ -6,6 +6,9 @@ import type { F0Info } from "./types";
 export type AudioState = {
   audio?: AudioBuffer;
   setAudio: (audio: AudioBuffer | undefined) => void;
+
+  audioIsLoading: boolean;
+  setAudioIsLoading: (loading: boolean) => void;
 };
 
 export const useAudioStore = create<AudioState>()(
@@ -13,6 +16,14 @@ export const useAudioStore = create<AudioState>()(
     setAudio: (audio: AudioBuffer | undefined) => {
       set((state) => {
         state.audio = audio;
+      });
+    },
+
+    audioIsLoading: false,
+
+    setAudioIsLoading: (loading: boolean) => {
+      set((draft) => {
+        draft.audioIsLoading = loading;
       });
     },
   }))

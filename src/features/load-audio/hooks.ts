@@ -1,4 +1,4 @@
-import { useSetAudio, useStopAudio } from "@/hooks";
+import { useSetAudio, useSetAudioIsLoading, useStopAudio } from "@/hooks";
 import type React from "react";
 import { useCallback, useState } from "react";
 import { makeAudioBufferMono } from "./utils/dsp";
@@ -8,6 +8,7 @@ export function useLoadAudio() {
   const [fileName, setFileName] = useState<string>("");
   const setAudio = useSetAudio();
   const stopAudio = useStopAudio();
+  const setAudioIsLoading = useSetAudioIsLoading();
 
   const handleFileChange = useCallback(
     async (ev: React.ChangeEvent<HTMLInputElement>) => {
@@ -17,6 +18,8 @@ export function useLoadAudio() {
       if (!file) {
         return;
       }
+
+      setAudioIsLoading(true);
 
       try {
         const buffer = await readFileAsArray(file);
@@ -34,8 +37,10 @@ export function useLoadAudio() {
         ev.target.value = "";
         setFileName("");
       }
+
+      setAudioIsLoading(false);
     },
-    [stopAudio, setAudio]
+    [stopAudio, setAudio, setAudioIsLoading]
   );
 
   return {
