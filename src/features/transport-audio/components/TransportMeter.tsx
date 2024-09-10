@@ -18,7 +18,7 @@ function formatTime(msecTime: number): string {
 }
 
 export const TransportMeter = React.memo((props: TransportMeterProps) => {
-  const { playingPositionGetter: getPlayingPosition, ...boxProps } = props;
+  const { playingPositionGetter: getPlayingPosition, sx, ...boxProps } = props;
 
   const { current: transportState } = useTransportStateState();
 
@@ -57,5 +57,15 @@ export const TransportMeter = React.memo((props: TransportMeterProps) => {
     };
   }, [transportState, animate, setMsecTime]);
 
-  return <Box {...boxProps}>{formatTime(msec)}</Box>;
+  return (
+    <Box
+      {...boxProps}
+      sx={{
+        ...sx,
+        textAlign: "center",
+      }}
+    >
+      {formatTime(msec)}
+    </Box>
+  );
 });

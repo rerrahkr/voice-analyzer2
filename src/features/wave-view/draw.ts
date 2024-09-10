@@ -1,3 +1,5 @@
+import { deepOrange, grey } from "@mui/material/colors";
+
 const WIDTH_PIXEL_RATE = 1000;
 
 /**
@@ -54,7 +56,7 @@ export function drawPlaybackPositionLayer(
   const canvasTime = timeToCanvasX(transportTime);
   const x = canvasTime - canvasOffset;
 
-  context.strokeStyle = "black";
+  context.strokeStyle = grey[900];
 
   context.beginPath();
   context.moveTo(x, 0);
@@ -78,7 +80,7 @@ export function drawGrid(
 
   context.textBaseline = "top";
   context.font = `1em ${getComputedStyle(context.canvas).fontFamily}`;
-  context.fillStyle = "grey";
+  context.fillStyle = grey[600];
 
   const GRID_TIME = 0.1;
   for (
@@ -87,11 +89,11 @@ export function drawGrid(
     time = ++count * GRID_TIME
   ) {
     if (count % 10 === 0) {
-      context.strokeStyle = "grey";
+      context.strokeStyle = grey[400];
     } else if (count % 5 === 0) {
-      context.strokeStyle = "lightgrey";
+      context.strokeStyle = grey[300];
     } else {
-      context.strokeStyle = "whitesmoke";
+      context.strokeStyle = grey[200];
     }
 
     const x = Math.round((time - timeLeft) * WIDTH_PIXEL_RATE);
@@ -106,7 +108,7 @@ export function drawGrid(
   // Draw zero-line.
   const centerY = height / 2;
 
-  context.strokeStyle = "grey";
+  context.strokeStyle = grey[400];
   context.lineWidth = 1;
 
   context.beginPath();
@@ -124,11 +126,11 @@ export function drawWave(
 
   const { width, height } = context.canvas;
   const centerY = height / 2;
-  const MAX_HEIGHT_PIXEL = 800;
+  const MAX_HEIGHT_PIXEL = 1000;
   const maxDrawableHeight = Math.min(height, MAX_HEIGHT_PIXEL);
   const styleWidth = context.canvas.getBoundingClientRect().width;
 
-  context.strokeStyle = "red";
+  context.strokeStyle = deepOrange[500];
 
   context.beginPath();
 

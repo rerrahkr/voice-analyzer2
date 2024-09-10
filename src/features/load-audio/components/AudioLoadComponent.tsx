@@ -25,7 +25,7 @@ export const AudioLoadComponent = React.memo((): React.JSX.Element => {
         component="label"
         htmlFor="fileInput"
         sx={{
-          width: 100,
+          width: "10rem",
           overflow: "hidden",
           whiteSpace: "nowrap",
           textOverflow: "ellipsis",

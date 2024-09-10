@@ -1,6 +1,7 @@
 import { Box } from "@mui/material";
 import Divider from "@mui/material/Divider";
 import Stack from "@mui/material/Stack";
+import { yellow } from "@mui/material/colors";
 import type React from "react";
 import { useAnalyzeAudio } from "./features/analyze-audio";
 import { ViewsController } from "./features/control-views";
@@ -43,7 +44,7 @@ function App(): React.JSX.Element {
             alignItems: "center",
             justifyContent: "left",
             flexWrap: "wrap",
-            backgroundColor: "#ffffea",
+            backgroundColor: yellow[50],
             boxShadow: 2,
             zIndex: 100,
           }}
@@ -51,7 +52,12 @@ function App(): React.JSX.Element {
           <AudioLoadComponent />
           <Divider orientation="vertical" flexItem />
           <TransportController />
-          <TransportMeter playingPositionGetter={getPlayingPosition} />
+          <TransportMeter
+            playingPositionGetter={getPlayingPosition}
+            sx={{
+              width: "5rem",
+            }}
+          />
           <Divider orientation="vertical" flexItem />
           <ViewsController />
         </Stack>
