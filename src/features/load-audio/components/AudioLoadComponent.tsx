@@ -15,7 +15,7 @@ export const AudioLoadComponent = React.memo((): React.JSX.Element => {
           <FileInputButton
             id="fileInput"
             variant="contained"
-            accept=".wav"
+            accept="audio/*"
             forceChange
             onChange={handleFileChange}
           />
