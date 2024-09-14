@@ -29,6 +29,8 @@ const componentCss = {
     position: absolute;
     top: 0;
     left: 0;
+    width: 100%;
+    height: 100%;
   `,
 };
 
@@ -62,21 +64,11 @@ export const AutoResizedCanvas = forwardRef<
         const directionIsHorizontal =
           getComputedStyle(canvas).writingMode.startsWith("horizontal");
 
-        {
-          const size = entry.devicePixelContentBoxSize[0];
-          canvas.height = directionIsHorizontal
-            ? size.blockSize
-            : size.inlineSize;
-          canvas.width = directionIsHorizontal
-            ? size.inlineSize
-            : size.blockSize;
-        }
-
-        {
-          const size = entry.contentBoxSize[0];
-          canvas.style.height = `${directionIsHorizontal ? size.blockSize : size.inlineSize}px`;
-          canvas.style.width = `${directionIsHorizontal ? size.inlineSize : size.blockSize}px`;
-        }
+        const size = entry.devicePixelContentBoxSize[0];
+        canvas.height = directionIsHorizontal
+          ? size.blockSize
+          : size.inlineSize;
+        canvas.width = directionIsHorizontal ? size.inlineSize : size.blockSize;
       }
 
       onResize?.();
