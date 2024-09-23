@@ -1,10 +1,10 @@
 import {
   type AudioState,
-  type F0State,
+  type PitchState,
   type SyncViewsState,
   type TransportState,
   useAudioStore,
-  useF0State,
+  usePitchState,
   useSyncViewsState,
   useTransportState,
 } from "./store";
@@ -52,11 +52,27 @@ export function useEnableViewFollowPlayback(): SyncViewsState["enableFollowPlayb
   return useSyncViewsState((state) => state.enableFollowPlayback);
 }
 
-// Hooks for F0.
-export function useF0Info(): F0State["f0Info"] {
-  return useF0State((state) => state.f0Info);
+export function usePitchViewIsVisible(): SyncViewsState["pitchViewIsVisible"] {
+  return useSyncViewsState((state) => state.pitchViewIsVisible);
 }
 
-export function useSetF0Info(): F0State["setF0Info"] {
-  return useF0State((state) => state.setF0Info);
+export function useSetPitchViewVisibility(): SyncViewsState["setPitchViewVisibility"] {
+  return useSyncViewsState((state) => state.setPitchViewVisibility);
+}
+
+export function useViewScrollLeft(): SyncViewsState["scrollLeft"] {
+  return useSyncViewsState((state) => state.scrollLeft);
+}
+
+export function useSetViewScrollLeft(): SyncViewsState["setScrollLeft"] {
+  return useSyncViewsState((state) => state.setScrollLeft);
+}
+
+// Hooks for pitch.
+export function usePitchInfo(): PitchState["pitchInfo"] {
+  return usePitchState((state) => state.pitchInfo);
+}
+
+export function useSetPitchInfo(): PitchState["setPitchInfo"] {
+  return usePitchState((state) => state.setPitchInfo);
 }

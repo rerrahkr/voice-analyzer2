@@ -127,6 +127,16 @@ interface WasmModule {
     _0: number,
     _1: number
   ): void;
+  __ZN7WorldJS8F0ToCentEN10emscripten3valE(_0: number, _1: number): void;
+  __ZN14WorldJSWrapper8F0ToCentEN10emscripten3valE(
+    _0: number,
+    _1: number
+  ): void;
+  __ZN7WorldJS8CentToF0EN10emscripten3valE(_0: number, _1: number): void;
+  __ZN14WorldJSWrapper8CentToF0EN10emscripten3valE(
+    _0: number,
+    _1: number
+  ): void;
 }
 
 type EmbindString =
@@ -210,6 +220,10 @@ interface EmbindModule {
       F0EstimationResult &
       SpectralEnvelopeEstimationResult &
       AperiodicityEstimationResult;
+
+    F0ToCent(f0: Float64Array): Float64Array;
+
+    CentToF0(cent: Float64Array): Float64Array;
   };
 }
 

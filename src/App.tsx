@@ -6,18 +6,20 @@ import type React from "react";
 import { useAnalyzeAudio } from "./features/analyze-audio";
 import { ViewsController } from "./features/control-views";
 import { AudioLoadComponent, AudioLoadingSpinner } from "./features/load-audio";
+import { PitchView } from "./features/pitch-view";
 import {
   TransportController,
   TransportMeter,
   useTransportAudio,
 } from "./features/transport-audio";
 import { WaveView } from "./features/wave-view";
-import { useAudioIsLoading } from "./hooks";
+import { useAudioIsLoading, usePitchViewIsVisible } from "./hooks";
 
 function App(): React.JSX.Element {
   const { getPlayingPosition, setPlayingPosition } = useTransportAudio();
   useAnalyzeAudio();
   const audioIsLoading = useAudioIsLoading();
+  const pitchViewIsVisible = usePitchViewIsVisible();
 
   return (
     <Box
@@ -62,10 +64,17 @@ function App(): React.JSX.Element {
           <ViewsController />
         </Stack>
 
-        <WaveView
-          playingPositionGetter={getPlayingPosition}
-          playingPositionSetter={setPlayingPosition}
-        />
+        {pitchViewIsVisible ? (
+          <PitchView
+            playingPositionGetter={getPlayingPosition}
+            playingPositionSetter={setPlayingPosition}
+          />
+        ) : (
+          <WaveView
+            playingPositionGetter={getPlayingPosition}
+            playingPositionSetter={setPlayingPosition}
+          />
+        )}
       </Stack>
 
       {audioIsLoading && (

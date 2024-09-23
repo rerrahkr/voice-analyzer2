@@ -8,9 +8,8 @@ import {
   useViewShouldFollowPlayback,
 } from "@/hooks";
 import { clearCanvasContext, getCanvasContext2D } from "@/utils/canvas";
-import type React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { WaveViewProps } from "./components/WaveView";
+import type { PitchViewProps } from "./components/PitchView";
 import {
   canvasXToTime,
   drawGrid,
@@ -26,10 +25,10 @@ const LAYER_INDEX = {
   WAVE: 2,
 } as const;
 
-export function useHandleWaveView({
+export function useHandlePitchView({
   playingPositionGetter: getPlayingPosition,
   playingPositionSetter: setPlayingPosition,
-}: WaveViewProps) {
+}: PitchViewProps) {
   const canvasRef = useRef<ScrollableCanvasElement>(null);
   const audio = useAudio();
 
@@ -198,18 +197,12 @@ export function useHandleWaveView({
     [transportState, enableFollowPlayback, setPlayingPosition]
   );
 
-  // Turn off following playback when executing horizontal scroll while playing audio.
-  const handleWheel = useCallback(
-    (ev: React.WheelEvent<HTMLDivElement>) => {
-      if (
-        transportState === "playing" &&
-        (ev.deltaX || (ev.deltaY && ev.shiftKey))
-      ) {
-        enableFollowPlayback(false);
-      }
-    },
-    [transportState, enableFollowPlayback]
-  );
+  // Turn off following playback when executing scroll while playing audio.
+  const handleWheel = useCallback(() => {
+    if (transportState === "playing") {
+      enableFollowPlayback(false);
+    }
+  }, [transportState, enableFollowPlayback]);
 
   // Scroll handler.
   const setScrollLeft = useSetViewScrollLeft();
@@ -225,9 +218,6 @@ export function useHandleWaveView({
   const viewScrollLeft = useViewScrollLeft();
   // biome-ignore lint/correctness/useExhaustiveDependencies: Invoke this in mounting/unmounting.
   useEffect(() => {
-    if (canvasRef.current?.scroller ?? false) {
-      return;
-    }
     canvasRef.current?.scroller?.scrollTo({
       left: viewScrollLeft,
       behavior: "instant",

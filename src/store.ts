@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
-import type { F0Info } from "./types";
+import type { PitchInfo } from "./types";
 
 // State for Audio data.
 export type AudioState = {
@@ -83,6 +83,12 @@ export const useTransportState = create<TransportState>()(
 export type SyncViewsState = {
   shouldFollowPlayback: boolean;
   enableFollowPlayback: (enabled: boolean) => void;
+
+  pitchViewIsVisible: boolean;
+  setPitchViewVisibility: (visible: boolean) => void;
+
+  scrollLeft: number;
+  setScrollLeft: (offset: number) => void;
 };
 
 export const useSyncViewsState = create<SyncViewsState>()(
@@ -94,20 +100,36 @@ export const useSyncViewsState = create<SyncViewsState>()(
         state.shouldFollowPlayback = enabled;
       });
     },
+
+    pitchViewIsVisible: false,
+
+    setPitchViewVisibility: (visible: boolean) => {
+      set((state) => {
+        state.pitchViewIsVisible = visible;
+      });
+    },
+
+    scrollLeft: 0,
+
+    setScrollLeft: (offset: number) => {
+      set((state) => {
+        state.scrollLeft = offset;
+      });
+    },
   }))
 );
 
-// State for F0.
-export type F0State = {
-  f0Info?: F0Info;
-  setF0Info: (f0Info: F0Info | undefined) => void;
+// State for pitch.
+export type PitchState = {
+  pitchInfo?: PitchInfo;
+  setPitchInfo: (pitchInfo: PitchInfo | undefined) => void;
 };
 
-export const useF0State = create<F0State>()(
+export const usePitchState = create<PitchState>()(
   immer((set) => ({
-    setF0Info: (f0Info: F0Info | undefined) => {
+    setPitchInfo: (pitchInfo: PitchInfo | undefined) => {
       set((state) => {
-        state.f0Info = f0Info;
+        state.pitchInfo = pitchInfo;
       });
     },
   }))

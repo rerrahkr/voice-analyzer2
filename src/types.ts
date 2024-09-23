@@ -2,13 +2,13 @@ import type { SerializedStyles } from "@emotion/react";
 import type React from "react";
 
 /**
- * F0 information.
+ * Pitch information.
  */
-export type F0Info = {
+export type PitchInfo = {
   /** Second. */
   time: Float64Array;
-  /** Hz. */
-  f0: Float64Array;
+  /** Cent. */
+  data: Float64Array;
 };
 
 /**
